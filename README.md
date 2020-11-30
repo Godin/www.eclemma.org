@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.org/jacoco/www.eclemma.org.svg?branch=master)](https://travis-ci.org/jacoco/www.eclemma.org)
+![Build Status](https://github.com/Godin/www.eclemma.org/workflows/CI/badge.svg)

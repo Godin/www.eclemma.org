@@ -1,0 +1,54 @@
+name: CI
+
+# TODO PRs
+on: [push, repository_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      - name: "Build"
+        run: ./render.sh
+      - name: "Deploy"
+        # TODO only if repository_dispatch or commit to master
+        if: false
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          TEMP=/tmp/jacoco-snapshot
+          mkdir $TEMP
+          wget -O $TEMP/download.zip "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.jacoco&a=jacoco&e=zip&v=LATEST"
+          unzip $TEMP/download.zip -d $TEMP
+
+          TARGET=$RESULT_DIR/jacoco/trunk
+          mkdir $TARGET
+          cp $TEMP/index.html $TARGET
+          cp -r $TEMP/doc $TARGET/doc
+          cp -r $TEMP/test $TARGET/test
+          cp -r $TEMP/coverage $TARGET/coverage
+
+          cd work/result
+          touch .nojekyll
+
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git init
+          git add .
+          git commit -q -m "Automatic deployment"
+
+          echo "eclemma.godin.net.ru" > CNAME && git add CNAME && git commit -q --amend --reuse-message=HEAD
+          git push --force "https://${GH_TOKEN}@github.com/Godin/eclemma.godin.net.ru" master:gh-pages > /dev/null 2>&1
+
+          # TODO
+          #git push --force "https://${GH_TOKEN}@github.com/jacoco/jacoco.github.io" master > /dev/null 2>&1
+
+          echo "www.jacoco.org" > CNAME && git add CNAME && git commit -q --amend --reuse-message=HEAD
+          #git push --force "https://${GH_TOKEN}@github.com/jacoco/jacoco.org" master:gh-pages > /dev/null 2>&1
+
+          echo "www.eclemma.org" > CNAME && git add CNAME && git commit -q --amend --reuse-message=HEAD
+          #git push --force "https://${GH_TOKEN}@github.com/jacoco/eclemma.org" master:gh-pages > /dev/null 2>&1
+
+          echo "www.eclemma.com" > CNAME && git add CNAME && git commit -q --amend --reuse-message=HEAD
+          #git push --force "https://${GH_TOKEN}@github.com/jacoco/eclemma.com" master:gh-pages > /dev/null 2>&1
