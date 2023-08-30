@@ -3,7 +3,8 @@
 $LastChangedDate$
 $Revision$
 """
-import os, os.path, sys, urlparse
+import os, os.path, sys
+from urllib.parse import urlparse
 import itertools
 import genshi, genshi.input, genshi.template
 import gitlog
@@ -66,7 +67,7 @@ class Page(OutputItem):
         OutputItem.__init__(self, src)
 
     def create(self, site, path):
-        content = genshi.Stream(list(genshi.input.XMLParser(file(self.src))))
+        content = genshi.Stream(list(genshi.input.XMLParser(open(self.src, 'rt'))))
         def cond(c, a, b):
             if c:
                 return a
@@ -128,7 +129,7 @@ class Site(object):
     def generate(self, basedir):
         bytesum = 0
         items = self.items.items()
-        items.sort()
+        #items.sort()
         for (path, item) in items:
             outpath = os.path.normpath(os.path.join(basedir, path))
             try:
@@ -137,12 +138,17 @@ class Site(object):
                 pass
             f = open(outpath, 'w+b')
             content = item.create(self, path)
+            print(content)
+            print(type(content))
+            print(isinstance(content, bytes))
+            if (not isinstance(content, bytes)):
+                content = bytes(content, 'utf-8')
             f.write(content)
             f.close()
             bytesum += len(content)
-            print '%6d bytes %s' % (len(content), path)
+            #print '%6d bytes %s' % (len(content), path)
 
-        print '===================================================='
-        print '%6d bytes for %d files' % (bytesum, len(self.items))
+        #print '===================================================='
+        #print '%6d bytes for %d files' % (bytesum, len(self.items))
             
             

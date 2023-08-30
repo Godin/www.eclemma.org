@@ -35,6 +35,6 @@ def _get_repo_dir(file):
         return _get_repo_dir(dir)
 
 def _execute(cwd, *args):
-    popen = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
+    popen = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd, encoding='utf8')
     popen.wait()
     return popen.stdout.read()
